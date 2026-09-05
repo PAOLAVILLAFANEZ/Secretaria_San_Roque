@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+/* Ajustes globales para que la impresión no se deforme */
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    margin: 0;
+  }
+  
+  /* Ocultar elementos no deseados en impresión */
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Estilos personalizados para mejor visualización */
+.border-dashed {
+  border-style: dashed;
+}
+
+/* Animación para carga */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
