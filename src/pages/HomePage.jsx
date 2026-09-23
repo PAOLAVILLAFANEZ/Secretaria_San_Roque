@@ -19,7 +19,7 @@ export default function HomePage() {
       descripcion: 'Registro y certificados de Primera Comunión',
       color: 'from-green-400 to-green-600',
       path: '/comuniones',
-      stats: 'Próximamente'
+      stats: 'Activo'
     },
     {
       id: 'confirmaciones',
@@ -44,7 +44,7 @@ export default function HomePage() {
         </p>
         <div className="mt-4 inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm">
           <span className="mr-2">📌</span>
-          Bautismos y Confirmaciones disponibles
+          Bautismos, Comuniones y Confirmaciones disponibles
         </div>
       </div>
 
@@ -57,7 +57,7 @@ export default function HomePage() {
             className={`
               group relative bg-white rounded-2xl shadow-lg overflow-hidden 
               transition-all duration-300 hover:shadow-2xl hover:-translate-y-1
-              ${sacramento.id === 'bautismos' || sacramento.id === 'confirmaciones' ? 'hover:scale-105' : 'opacity-75 hover:opacity-100'}
+              hover:scale-105
             `}
           >
             {/* Gradiente de fondo */}
@@ -84,14 +84,8 @@ export default function HomePage() {
 
               {/* Estado */}
               <div className="flex items-center justify-between">
-                <span className={`
-                  inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                  ${sacramento.id === 'bautismos' || sacramento.id === 'confirmaciones'
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-yellow-100 text-yellow-700'
-                  }
-                `}>
-                  {sacramento.id === 'bautismos' || sacramento.id === 'confirmaciones' ? '✅' : '⏳'} {sacramento.stats}
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
+                  ✅ {sacramento.stats}
                 </span>
                 <span className="text-blue-600 font-medium group-hover:underline">
                   Gestionar →

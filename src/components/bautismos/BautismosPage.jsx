@@ -1,151 +1,159 @@
 import React, { useState } from 'react';
+import { HojaA4, MitadHoja } from '../common/PrintLayout';
+
+const formatearFecha = (fechaStr) => {
+  if (!fechaStr) return '';
+  const [year, month, day] = fechaStr.split('-');
+  return `${day}/${month}/${year}`;
+};
+
+const generarNroCertificado = (fecha, libro, orden) => {
+  if (!fecha || !libro || !orden) return '';
+  const compacto = fecha.replace(/-/g, '');
+  const ordenTexto = String(orden).padStart(2, '0');
+  return `${compacto}-${ordenTexto}/${libro}-`;
+};
+
+const EXCEPCIONES_MINUSCULA = new Set(['de', 'del', 'los', 'la', 'las']);
+
+const formatearTitulo = (texto) =>
+  texto
+    .split(/\s+/)
+    .map((palabra) => {
+      const limpia = palabra.toLowerCase();
+      return EXCEPCIONES_MINUSCULA.has(limpia)
+        ? limpia
+        : limpia.charAt(0).toUpperCase() + limpia.slice(1);
+    })
+    .join(' ');
+
+const formatearApellidoNombres = (valor) => {
+  const texto = String(valor ?? '').trim();
+  if (!texto) return '';
+  const [apellido, ...resto] = texto.split(',');
+  const nombres = resto.join(',').trim();
+  const apellidoFormateado = apellido.trim().toUpperCase();
+  if (!nombres) return apellidoFormateado;
+  return `${apellidoFormateado}, ${formatearTitulo(nombres)}`;
+};
+
+const formatearNombresApellido = (valor) => {
+  const texto = String(valor ?? '').trim();
+  if (!texto) return '';
+  const [nombres, ...resto] = texto.split(',');
+  const apellido = resto.join(',').trim();
+  const nombresFormateados = formatearTitulo(nombres);
+  if (!apellido) return nombresFormateados;
+  return `${nombresFormateados}, ${apellido.toUpperCase()}`;
+};
 
 // ==========================================
-// 1. CERTIFICADO DE BAUTISMO (A5 - 148.5mm x 210mm)
+// 1. CERTIFICADO DE BAUTISMO (mismo formato que Confirmaciones)
 // ==========================================
 const CertificadoBautismo = ({ data, tipo }) => {
   // tipo = 'fiel' o 'parroquia'
-
-  const formatearFecha = (fechaStr) => {
-    if (!fechaStr) return '';
-    const [year, month, day] = fechaStr.split('-');
-    return `${day}/${month}/${year}`;
-  };
-
-  // Formato del certificado: Año-Mes-Día-Libro-NroCert
-  const generarNroCertificado = () => {
-    if (!data.fechaBautismo || !data.libro || !data.dni) return '';
-    const fechaParts = data.fechaBautismo.split('-');
-    return `${fechaParts[0]}-${fechaParts[1]}-${fechaParts[2]}-${data.libro}-${data.dni}`;
-  };
+  const anotacion = tipo === 'fiel' ? 'Para el Fiel' : 'Para la Parroquia';
 
   return (
-    <div className="relative w-[210mm] h-[148.5mm] bg-white p-6 box-border flex flex-col text-[10px] font-serif leading-relaxed overflow-hidden select-none">
+    <div className="flex flex-col h-full text-black font-sans text-[12px] leading-tight">
       
       {/* ===== ENCABEZADO ===== */}
-      <div className="text-center w-full">
-        <h1 className="text-lg font-bold tracking-widest text-black uppercase">DIÓCESIS DE CATAMARCA</h1>
-        <h2 className="text-[10px] font-bold text-black uppercase">Provincia de Catamarca - República Argentina</h2>
-        
-        <div className="flex justify-center my-1">
-          <span className="text-[10px] tracking-[0.5em]">********</span>
-        </div>
-        
-        <h3 className="text-base font-bold text-black uppercase tracking-wider mt-1">CERTIFICADO DE BAUTISMO</h3>
-        
-        <div className="mt-2">
-          <p className="font-bold text-[11px] uppercase tracking-wide">PARROQUIA SANTUARIO SAN ROQUE</p>
-          <p className="text-[7px] text-black font-medium">Pje. Lucio Quiroga 91 – (4700) San Fernando del Valle de Catamarca – Tel. (+54) (383) 4859396</p>
+      <div className="text-center mb-2">
+        <h2 className="italic text-lg font-serif">Diócesis de Catamarca</h2>
+        <p className="text-[11px]">Provincia de Catamarca - República Argentina</p>
+        <h1 className="font-bold text-lg mt-0.5 tracking-wider">CERTIFICADO DE BAUTISMO</h1>
+      </div>
+
+      <div className="text-center mb-2">
+        <div className="font-bold italic text-[13px]">Parroquia Santuario San Roque</div>
+        <div className="text-[10px] font-semibold">
+          Pje. Lucio Quiroga 91, La Chacarita - (4700) San Fernando del Valle de Catamarca - Tel. (+54) (383) 4859396
         </div>
       </div>
 
-      {/* ===== CUERPO ===== */}
-      <div className="w-full text-left mt-3 flex-1">
-        
-        {/* Datos Personales */}
-        <p className="font-bold text-[10px] mb-1 underline underline-offset-2">Datos personales</p>
-        <div className="space-y-1">
-          <div className="flex items-center">
-            <span className="font-bold whitespace-nowrap text-[9px]">APELLIDO y Nombres:</span>
-            <span className="flex-1 border-b border-black ml-1 h-5 px-1 text-[9px] uppercase">{data.apellidoNombres || ''}</span>
-            <span className="font-bold whitespace-nowrap text-[9px] ml-2">D. N. I.:</span>
-            <span className="w-24 border-b border-black ml-1 h-5 px-1 text-[9px]">{data.dni || ''}</span>
-          </div>
+      {/* ===== DATOS PERSONALES ===== */}
+      <p className="font-bold mb-1 underline underline-offset-2">Datos personales</p>
+      <div className="flex items-end mb-1">
+        <span className="whitespace-nowrap mr-2">APELLIDO y Nombres:</span>
+        <span className="flex-1 border-b border-black px-2 font-semibold">{formatearApellidoNombres(data.apellidoNombres)}</span>
+        <span className="whitespace-nowrap mx-2">D. N. I.:</span>
+        <span className="w-28 border-b border-black px-2">{data.dni || ''}</span>
+      </div>
 
-          <div className="flex items-center">
-            <span className="font-bold whitespace-nowrap text-[9px]">Lugar de nacimiento:</span>
-            <span className="flex-1 border-b border-black ml-1 h-5 px-1 text-[9px]">{data.lugarNacimiento || ''}</span>
-            <span className="font-bold whitespace-nowrap text-[9px] ml-2">Fecha de Nacimiento:</span>
-            <span className="w-24 border-b border-black ml-1 h-5 px-1 text-[9px]">{formatearFecha(data.fechaNacimiento)}</span>
-          </div>
+      <div className="flex items-end mb-1">
+        <span className="whitespace-nowrap mr-2">Lugar de nacimiento:</span>
+        <span className="flex-[2] border-b border-black px-2">{formatearTitulo(data.lugarNacimiento)}</span>
+        <span className="whitespace-nowrap mx-2">Fecha de Nacimiento:</span>
+        <span className="flex-1 border-b border-black px-2">{formatearFecha(data.fechaNacimiento)}</span>
+      </div>
 
-          <div className="flex items-center">
-            <span className="font-bold whitespace-nowrap text-[9px]">Padre (Nombres y APELLIDO):</span>
-            <span className="flex-1 border-b border-black ml-1 h-5 px-1 text-[9px] uppercase">{data.padre || ''}</span>
-            <span className="font-bold whitespace-nowrap text-[9px] ml-2">D. N. I.:</span>
-            <span className="w-24 border-b border-black ml-1 h-5 px-1 text-[9px]">{data.dniPadre || ''}</span>
-          </div>
+      <div className="flex items-end mb-1">
+        <span className="whitespace-nowrap mr-2">Padre (Nombres y APELLIDO):</span>
+        <span className="flex-1 border-b border-black px-2">{formatearNombresApellido(data.padre)}</span>
+        <span className="whitespace-nowrap mx-2">D. N. I.:</span>
+        <span className="w-28 border-b border-black px-2">{data.dniPadre || ''}</span>
+      </div>
 
-          <div className="flex items-center">
-            <span className="font-bold whitespace-nowrap text-[9px]">Madre (Nombres y APELLIDO):</span>
-            <span className="flex-1 border-b border-black ml-1 h-5 px-1 text-[9px] uppercase">{data.madre || ''}</span>
-            <span className="font-bold whitespace-nowrap text-[9px] ml-2">D. N. I.:</span>
-            <span className="w-24 border-b border-black ml-1 h-5 px-1 text-[9px]">{data.dniMadre || ''}</span>
-          </div>
+      <div className="flex items-end mb-1">
+        <span className="whitespace-nowrap mr-2">Madre (Nombres y APELLIDO):</span>
+        <span className="flex-1 border-b border-black px-2">{formatearNombresApellido(data.madre)}</span>
+        <span className="whitespace-nowrap mx-2">D. N. I.:</span>
+        <span className="w-28 border-b border-black px-2">{data.dniMadre || ''}</span>
+      </div>
 
-          <div className="flex items-center">
-            <span className="font-bold whitespace-nowrap text-[9px]">{data.hijo || 'Hija legítima:'}</span>
-            <span className="flex-1 border-b border-black ml-1 h-5 px-1 text-[9px]">{data.hijoTexto || ''}</span>
-            <span className="font-bold whitespace-nowrap text-[9px] ml-2">Domicilio:</span>
-            <span className="flex-1 border-b border-black ml-1 h-5 px-1 text-[9px]">{data.domicilio || ''}</span>
-            <span className="font-bold whitespace-nowrap text-[9px] ml-2">Tel.:</span>
-            <span className="w-20 border-b border-black ml-1 h-5 px-1 text-[9px]">{data.telefono || ''}</span>
-          </div>
+      <div className="flex items-end mb-1">
+        <span className="whitespace-nowrap mr-2">Hijo/a:</span>
+        <span className="w-36 border-b border-black px-2">{data.hijo || ''}</span>
+        <span className="whitespace-nowrap mx-2">Domicilio:</span>
+        <span className="flex-1 border-b border-black px-2">{formatearTitulo(data.domicilio)}</span>
+        <span className="whitespace-nowrap mx-2">Tel.:</span>
+        <span className="w-24 border-b border-black px-2">{data.telefono || ''}</span>
+      </div>
+
+      {/* ===== DATOS DEL BAUTISMO ===== */}
+      <p className="font-bold mb-1 mt-1.5 underline underline-offset-2">Datos del Bautismo</p>
+      <div className="flex items-end mb-1">
+        <span className="whitespace-nowrap mr-2">Lugar:</span>
+        <span className="flex-[2] border-b border-black px-2">{formatearTitulo(data.lugarBautismo)}</span>
+        <span className="whitespace-nowrap mx-2">Fecha:</span>
+        <span className="flex-1 border-b border-black px-2">{formatearFecha(data.fechaBautismo)}</span>
+      </div>
+
+      <div className="flex items-end mb-1">
+        <span className="whitespace-nowrap mr-2">Ministro celebrante:</span>
+        <span className="flex-1 border-b border-black px-2">{formatearTitulo(data.ministro)}</span>
+      </div>
+
+      <div className="flex items-end mb-1">
+        <span className="whitespace-nowrap mr-2">Padrino (Nombres y Apellido):</span>
+        <span className="flex-1 border-b border-black px-2">{formatearTitulo(data.padrino)}</span>
+      </div>
+
+      <div className="flex items-end mb-1">
+        <span className="whitespace-nowrap mr-2">Madrina (Nombres y Apellido):</span>
+        <span className="flex-1 border-b border-black px-2">{formatearTitulo(data.madrina)}</span>
+      </div>
+
+      <div className="mb-1 grid w-max grid-cols-[auto] items-end gap-y-1.5">
+        <div className="flex items-end">
+          <span className="whitespace-nowrap mr-2">Libro:</span>
+          <span className="w-14 border-b border-black px-2">{data.libro || ''}</span>
+          <span className="whitespace-nowrap ml-2 mr-2">Folio:</span>
+          <span className="w-14 border-b border-black px-2">{data.folio || ''}</span>
         </div>
 
-        {/* Datos del Bautismo */}
-        <p className="font-bold text-[10px] mt-2 mb-1 underline underline-offset-2">Datos del Bautismo</p>
-        <div className="space-y-1">
-          <div className="flex items-center">
-            <span className="font-bold whitespace-nowrap text-[9px]">Lugar:</span>
-            <span className="flex-1 border-b border-black ml-1 h-5 px-1 text-[9px]">{data.lugarBautismo || ''}</span>
-            <span className="font-bold whitespace-nowrap text-[9px] ml-2">Fecha:</span>
-            <span className="w-24 border-b border-black ml-1 h-5 px-1 text-[9px]">{formatearFecha(data.fechaBautismo)}</span>
-          </div>
-
-          <div className="flex items-center">
-            <span className="font-bold whitespace-nowrap text-[9px]">Ministro celebrante:</span>
-            <span className="flex-1 border-b border-black ml-1 h-5 px-1 text-[9px]">{data.ministro || ''}</span>
-          </div>
-
-          <div className="flex items-center">
-            <span className="font-bold whitespace-nowrap text-[9px]">Padrino (Nombres y Apellido):</span>
-            <span className="flex-1 border-b border-black ml-1 h-5 px-1 text-[9px] uppercase">{data.padrino || ''}</span>
-          </div>
-
-          <div className="flex items-center">
-            <span className="font-bold whitespace-nowrap text-[9px]">Madrina (Nombres y Apellido):</span>
-            <span className="flex-1 border-b border-black ml-1 h-5 px-1 text-[9px] uppercase">{data.madrina || ''}</span>
-          </div>
-
-          <div className="flex items-center">
-            <span className="font-bold whitespace-nowrap text-[9px]">Libro:</span>
-            <span className="w-16 border-b border-black ml-1 h-5 px-1 text-[9px]">{data.libro || ''}</span>
-            <span className="font-bold whitespace-nowrap text-[9px] ml-4">Folio:</span>
-            <span className="w-16 border-b border-black ml-1 h-5 px-1 text-[9px]">{data.folio || ''}</span>
-            <span className="font-bold whitespace-nowrap text-[9px] ml-4">Certificado N°:</span>
-            <span className="w-32 border-b border-black ml-1 h-5 px-1 text-[9px]">{generarNroCertificado()}</span>
-            <span className="font-bold whitespace-nowrap text-[9px] ml-2">Fecha:</span>
-            <span className="w-20 border-b border-black ml-1 h-5 px-1 text-[9px]">{formatearFecha(data.fechaBautismo)}</span>
-          </div>
+        <div className="flex items-end">
+          <span className="whitespace-nowrap">Certificado N°:</span>
+          <span className="min-w-0 flex-1 border-b border-black px-2">{generarNroCertificado(data.fechaBautismo, data.libro, data.orden)}</span>
         </div>
       </div>
 
       {/* ===== PIE DE PÁGINA ===== */}
-      <div className="mt-auto pt-2 flex justify-between items-end">
-        {/* Sello - Solo para la versión Parroquia */}
-        {tipo === 'parroquia' && (
-          <div className="w-24 h-24 flex items-center justify-center">
-            <div className="w-[72px] h-[72px] rounded-full border-2 border-black flex flex-col items-center justify-center text-[5px] font-bold leading-tight p-1 relative">
-              <div className="absolute w-[68px] h-[68px] rounded-full border border-black border-dashed"></div>
-              <span className="text-[7px] tracking-widest">SELLO</span>
-              <span className="text-[5px] mt-0.5">PARROQUIAL</span>
-            </div>
-          </div>
-        )}
-        
-        {/* Espacio flexible para alinear */}
-        {tipo === 'fiel' && <div className="w-24"></div>}
-        
-        <div className="flex-1"></div>
-
-        {/* Firma y texto final */}
-        <div className="text-right">
-          <div className="w-48 border-t-2 border-black pt-0.5 text-[8px] font-bold uppercase tracking-wide">
-            {data.parroco || 'Pbro. _______________'}
-          </div>
-          <div className="text-[7px] font-bold mt-0.5">Párroco</div>
-          <div className="text-[7px] font-bold mt-1">Para el fiel</div>
+      <div className="flex justify-between items-end px-12 pb-2 mt-auto">
+        <div className="text-[11px] font-semibold italic">{anotacion}</div>
+        <div className="text-center w-64">
+          <div className="border-b border-dotted border-black h-4"></div>
+          <div className="text-[10px] font-semibold mt-0.5">Párroco</div>
         </div>
       </div>
     </div>
@@ -158,11 +166,11 @@ const CertificadoBautismo = ({ data, tipo }) => {
 export default function BautismosPage() {
   const [formData, setFormData] = useState({
     apellidoNombres: '', dni: '', lugarNacimiento: '', fechaNacimiento: '',
-    padre: '', dniPadre: '', madre: '', dniMadre: '', 
-    hijo: 'Hija legítima:', hijoTexto: '',
+    padre: '', dniPadre: '', madre: '', dniMadre: '',
+    hijo: '-',
     domicilio: '', telefono: '',
-    lugarBautismo: '', fechaBautismo: '', ministro: '', padrino: '', madrina: '', 
-    libro: '', folio: '', parroco: ''
+    lugarBautismo: '', fechaBautismo: '', ministro: '', padrino: '', madrina: '',
+    libro: '', folio: '', orden: ''
   });
 
   const [isPrinting, setIsPrinting] = useState(false);
@@ -170,7 +178,14 @@ export default function BautismosPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    let nuevoValor = value;
+    if (name === 'libro' || name === 'folio' || name === 'orden') {
+      nuevoValor = value.replace(/\D/g, '');
+    }
+    if (name === 'dni' || name === 'dniPadre' || name === 'dniMadre') {
+      nuevoValor = value.replace(/[^\d.]/g, '');
+    }
+    setFormData(prev => ({ ...prev, [name]: nuevoValor }));
   };
 
   const handleSubmit = (e) => {
@@ -188,16 +203,16 @@ export default function BautismosPage() {
   const limpiarFormulario = () => {
     setFormData({
       apellidoNombres: '', dni: '', lugarNacimiento: '', fechaNacimiento: '',
-      padre: '', dniPadre: '', madre: '', dniMadre: '', 
-      hijo: 'Hija legítima:', hijoTexto: '',
+      padre: '', dniPadre: '', madre: '', dniMadre: '',
+      hijo: '-',
       domicilio: '', telefono: '',
-      lugarBautismo: '', fechaBautismo: '', ministro: '', padrino: '', madrina: '', 
-      libro: '', folio: '', parroco: ''
+      lugarBautismo: '', fechaBautismo: '', ministro: '', padrino: '', madrina: '',
+      libro: '', folio: '', orden: ''
     });
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-100 p-4 md:p-8 print:p-0">
       
       {/* Formulario de Ingreso */}
       {showForm && (
@@ -252,12 +267,12 @@ export default function BautismosPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase">Etiqueta (Ej: Hija legítima)</label>
-              <input type="text" name="hijo" value={formData.hijo} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm p-2 border" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase">Valor (Ej: María)</label>
-              <input type="text" name="hijoTexto" value={formData.hijoTexto} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm p-2 border" />
+              <label className="block text-xs font-bold text-gray-700 uppercase">Etiqueta (Hijo/a)</label>
+              <select name="hijo" value={formData.hijo} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm p-2 border">
+                <option value="Legítimo">Legítimo</option>
+                <option value="Legítima">Legítima</option>
+                <option value="-">-</option>
+              </select>
             </div>
 
             <div>
@@ -305,9 +320,9 @@ export default function BautismosPage() {
               <input type="text" name="folio" value={formData.folio} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm p-2 border" />
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-xs font-bold text-gray-700 uppercase">Párroco (Nombre completo)</label>
-              <input type="text" name="parroco" value={formData.parroco} onChange={handleChange} placeholder="Ej: Pbro. Lic. Carlos R. Figueroa Arteaga" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm p-2 border" />
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase">Orden (solo para Certificado N°)</label>
+              <input type="text" name="orden" value={formData.orden} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 sm:text-sm p-2 border" />
             </div>
 
             <div className="md:col-span-2 flex justify-end gap-3 mt-6">
@@ -327,21 +342,19 @@ export default function BautismosPage() {
       )}
 
       {/* ===== HOJA A4 DE IMPRESIÓN ===== */}
-      <div className="print:block mt-8">
+      <div className="print:block mt-8 print:mt-0">
         {!showForm && (
-          <div className="w-[210mm] h-[297mm] mx-auto bg-white flex flex-col box-border overflow-hidden shadow-2xl print:shadow-none mb-10 print:mb-0">
-            
+          <HojaA4>
             {/* Certificado 1: Para la Parroquia (CON sello) */}
-            <div className="h-[148.5mm] w-full border-b-2 border-dashed border-gray-300 flex items-center justify-center relative">
+            <MitadHoja lineaCorte>
               <CertificadoBautismo data={formData} tipo="parroquia" />
-            </div>
+            </MitadHoja>
 
             {/* Certificado 2: Para el Fiel (SIN sello) */}
-            <div className="h-[148.5mm] w-full flex items-center justify-center relative">
+            <MitadHoja>
               <CertificadoBautismo data={formData} tipo="fiel" />
-            </div>
-
-          </div>
+            </MitadHoja>
+          </HojaA4>
         )}
       </div>
     </div>

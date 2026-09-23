@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import * as xlsx from 'xlsx';
+import { PLANTILLA_CONFIRMACIONES, exportarExcelConfirmaciones } from './confirmacionesExcel';
 
 export default function ExcelGenerator({ onDataLoaded }) {
-  const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -18,11 +18,9 @@ export default function ExcelGenerator({ onDataLoaded }) {
     
     if (!validTypes.includes(selectedFile.type)) {
       setError('Por favor, selecciona un archivo Excel válido (.xlsx o .xls)');
-      setFile(null);
       return;
     }
     
-    setFile(selectedFile);
     setError('');
     procesarArchivo(selectedFile);
   };
@@ -49,7 +47,7 @@ export default function ExcelGenerator({ onDataLoaded }) {
         
         onDataLoaded(jsonDatos);
         setLoading(false);
-      } catch (err) {
+      } catch {
         setError('Error al procesar el archivo. Verifica que sea un Excel válido.');
         setLoading(false);
       }
@@ -64,50 +62,7 @@ export default function ExcelGenerator({ onDataLoaded }) {
   };
 
   const descargarPlantilla = () => {
-    // Crear plantilla con los campos necesarios
-    const plantilla = [
-      {
-        'Apellido y Nombres': 'Ejemplo Apellido',
-        'DNI': '12345678',
-        'Localidad Nacimiento': 'Catamarca',
-        'Fecha Nacimiento': '01/01/2000',
-        'Padre': 'Padre Ejemplo',
-        'Madre': 'Madre Ejemplo',
-        'Domicilio': 'Calle Ejemplo 123',
-        'Telefono': '3834567890',
-        'Parroquia Bautismo': 'Santuario San Roque',
-        'Diocesis Bautismo': 'Catamarca',
-        'Fecha Bautismo': '01/01/2000',
-        'Libro Bautismo': '1',
-        'Folio Bautismo': '1',
-        'Lugar Confirmacion': 'Santuario San Roque',
-        'Fecha Confirmacion': '01/01/2024',
-        'Delegado Celebrante': 'Mons. Ejemplo',
-        'Padrino o Madrina': 'Padrino Ejemplo',
-        'Libro Confirmacion': '1',
-        'Folio Confirmacion': '1',
-        'Acta Nro': '1',
-        'Dia Emision': '01',
-        'Mes Emision': 'Enero',
-        'Anio Emision': '24'
-      }
-    ];
-
-    const wb = xlsx.utils.book_new();
-    const ws = xlsx.utils.json_to_sheet(plantilla);
-    xlsx.utils.book_append_sheet(wb, ws, 'Confirmaciones');
-    
-    // Ajustar ancho de columnas
-    const colWidths = [
-      { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 20 },
-      { wch: 20 }, { wch: 25 }, { wch: 15 }, { wch: 25 }, { wch: 20 },
-      { wch: 15 }, { wch: 10 }, { wch: 10 }, { wch: 25 }, { wch: 15 },
-      { wch: 25 }, { wch: 25 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
-      { wch: 10 }, { wch: 15 }, { wch: 10 }
-    ];
-    ws['!cols'] = colWidths;
-
-    xlsx.writeFile(wb, 'plantilla_confirmaciones.xlsx');
+    exportarExcelConfirmaciones([PLANTILLA_CONFIRMACIONES]);
   };
 
   return (
@@ -152,7 +107,8 @@ export default function ExcelGenerator({ onDataLoaded }) {
 
         <div className="mt-4 p-4 bg-blue-50 rounded-md">
           <p className="text-sm text-blue-800">
-            <strong>Consejo:</strong> Descarga la plantilla, completa los datos y súbela para generar los comunicados.
+            <strong>Consejo:</strong> Descarga la plantilla, completa los datos y súbela para generar los documentos.
+            También podés exportar un Excel con tus datos ya cargados desde la página de Comuniones.
             El archivo debe tener las columnas exactas que muestra la plantilla.
           </p>
         </div>
