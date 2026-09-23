@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { HojaA4, MitadHoja } from '../common/PrintLayout';
 import { PLANTILLA_CONFIRMACIONES, exportarExcelConfirmaciones } from '../confirmaciones/confirmacionesExcel';
 

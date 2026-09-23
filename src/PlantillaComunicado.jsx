@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function PlantillaComunicado({ data, tipo = 'comunicado' }) {
   if (!data) return null;
 

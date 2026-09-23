@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import * as xlsx from 'xlsx';
 import { PLANTILLA_CONFIRMACIONES, exportarExcelConfirmaciones } from './confirmacionesExcel';
 

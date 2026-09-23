@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import PlantillaComunicado from '../../PlantillaComunicado';
 import ExcelGenerator from './ExcelGenerator';
 import { HojaA4, MitadHoja } from '../common/PrintLayout';

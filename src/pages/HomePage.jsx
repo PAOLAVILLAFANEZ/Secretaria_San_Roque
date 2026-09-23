@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 export default function HomePage() {
@@ -10,7 +9,7 @@ export default function HomePage() {
       descripcion: 'Generación de certificados de Bautismo (Fiel y Parroquia)',
       color: 'from-blue-400 to-blue-600',
       path: '/bautismos',
-      stats: 'Activo' // <--- Cambiado a Activo
+      stats: 'Activo'
     },
     {
       id: 'comuniones',
