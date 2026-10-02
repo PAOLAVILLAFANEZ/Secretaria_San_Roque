@@ -350,7 +350,7 @@ export default function BautismosPage() {
               <CertificadoBautismo data={formData} tipo="parroquia" />
             </MitadHoja>
 
-            {/* Certificado 2: Para el Fiel (SIN sello) */}
+            {/* Certificado 2: Para el Fiel */}
             <MitadHoja>
               <CertificadoBautismo data={formData} tipo="fiel" />
             </MitadHoja>
